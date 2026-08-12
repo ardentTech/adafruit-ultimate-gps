@@ -1,0 +1,12 @@
+[package]
+name = "adafruit-ultimate-gps"
+version = "0.1.0"
+edition = "2024"
+exclude = ["CHANGELOG.md", "examples/*"]
+
+[dependencies]
+defmt = "1.1.1"
+embedded-io-async = { version = "0.7.0", features = ["defmt"] }
+heapless = { version = "0.9.3", features = ["defmt"] }
+nmea = { git = "https://github.com/AeroRust/nmea.git", default-features = false, features = ["defmt", "GLL", "RMC", "VTG", "GGA", "GSA", "GSV", "ZDA"], rev = "4550cd0" }
+pmtk = { git = "https://github.com/ardentTech/pmtk.git", rev = "6637c2f", features = ["defmt", "mt3339"] }
