@@ -23,6 +23,7 @@ pub type RawSentence = String<SENTENCE_MAX_LEN>;
 pub enum GpsRequest {
     AicMode(AicModeCmd),
     DatumQuery(DatumQ),
+    // TODO
 }
 
 #[derive(Debug, Format)]

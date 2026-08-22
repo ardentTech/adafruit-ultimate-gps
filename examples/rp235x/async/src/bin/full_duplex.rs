@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use defmt::{error, info, unwrap};
+use defmt::{error, info};
 #[allow(unused_imports)]
 use {defmt_rtt as _, panic_probe as _};
 use embassy_executor::Spawner;
@@ -11,7 +11,6 @@ use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, BufferedUartRx, C
 use embassy_time::Timer;
 use static_cell::StaticCell;
 use adafruit_ultimate_gps::pmtk as pmtk;
-use pmtk::dt::nmea_output::Frequency;
 use adafruit_ultimate_gps::full_duplex::{GpsRx, GpsTx};
 
 bind_interrupts!(struct Irqs {
