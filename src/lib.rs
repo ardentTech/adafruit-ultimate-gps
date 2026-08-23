@@ -11,21 +11,12 @@ use heapless::String;
 use nmea::SentenceType;
 
 pub use pmtk;
-use pmtk::cmd::aic_mode::AicModeCmd;
-use pmtk::q::datum::DatumQ;
 use pmtk::response::PmtkResponse;
 
 const LINE_FEED: u8 = 0x0a; // '\n'
 const SENTENCE_MAX_LEN: usize = 255;
 
 pub type RawSentence = String<SENTENCE_MAX_LEN>;
-
-// #[derive(Debug)]
-// pub enum GpsRequest {
-//     AicMode(AicModeCmd),
-//     DatumQuery(DatumQ),
-//     // TODO
-// }
 
 #[derive(Debug, Format)]
 pub enum GpsResponse {
