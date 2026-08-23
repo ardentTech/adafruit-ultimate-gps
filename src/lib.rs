@@ -1,10 +1,10 @@
 #![no_std]
 
 mod error;
-mod uart;
 pub mod half_duplex;
 pub mod full_duplex;
 mod gps;
+pub mod traits;
 
 use defmt::Format;
 use heapless::String;

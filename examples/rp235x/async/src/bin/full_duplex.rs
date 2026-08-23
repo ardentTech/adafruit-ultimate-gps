@@ -11,7 +11,8 @@ use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, BufferedUartRx, C
 use embassy_time::Timer;
 use static_cell::StaticCell;
 use adafruit_ultimate_gps::{pmtk as pmtk, GpsResponse};
-use adafruit_ultimate_gps::full_duplex::{GpsRx, GpsTx};
+use adafruit_ultimate_gps::full_duplex;
+use adafruit_ultimate_gps::traits::{GpsRead, GpsWrite};
 
 bind_interrupts!(struct Irqs {
     UART0_IRQ => BufferedInterruptHandler<UART0>;
@@ -31,8 +32,8 @@ async fn main(spawner: Spawner) {
     let uart = BufferedUart::new(uart, tx_pin, rx_pin, Irqs, tx_buf, rx_buf, config);
 
     let (tx, rx) = uart.split();
-    let gps_rx = GpsRx::new(rx);
-    let mut gps_tx = GpsTx::new(tx);
+    let gps_rx = full_duplex::GpsRx::new(rx);
+    let mut gps_tx = full_duplex::GpsTx::new(tx);
 
     spawner.spawn(gps_reader(gps_rx).unwrap());
 
@@ -53,14 +54,13 @@ async fn main(spawner: Spawner) {
 }
 
 #[embassy_executor::task]
-async fn gps_reader(mut gps_rx: GpsRx<BufferedUartRx>) {
+async fn gps_reader(mut gps_rx: full_duplex::GpsRx<BufferedUartRx>) {
     info!("gps_reader task");
     loop {
         match gps_rx.read_response().await {
             Ok(Some(response)) => info!("gps.read_response ok: {:?}", response),
             Ok(None) => {}
             Err(e) => error!("gps.read_response err: {:?}", e),
-            _ => {}
         }
     }
 }

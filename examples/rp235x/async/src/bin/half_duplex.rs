@@ -11,6 +11,7 @@ use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, Config};
 use static_cell::StaticCell;
 use adafruit_ultimate_gps::pmtk as pmtk;
 use adafruit_ultimate_gps::half_duplex::Gps;
+use adafruit_ultimate_gps::traits::{GpsRead, GpsWrite};
 
 bind_interrupts!(struct Irqs {
     UART0_IRQ => BufferedInterruptHandler<UART0>;
