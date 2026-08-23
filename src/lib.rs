@@ -4,6 +4,7 @@ mod error;
 mod uart;
 pub mod half_duplex;
 pub mod full_duplex;
+mod gps;
 
 use defmt::Format;
 use heapless::String;
@@ -19,12 +20,12 @@ const SENTENCE_MAX_LEN: usize = 255;
 
 pub type RawSentence = String<SENTENCE_MAX_LEN>;
 
-#[derive(Debug)]
-pub enum GpsRequest {
-    AicMode(AicModeCmd),
-    DatumQuery(DatumQ),
-    // TODO
-}
+// #[derive(Debug)]
+// pub enum GpsRequest {
+//     AicMode(AicModeCmd),
+//     DatumQuery(DatumQ),
+//     // TODO
+// }
 
 #[derive(Debug, Format)]
 pub enum GpsResponse {

@@ -33,23 +33,17 @@ async fn main(_spawner: Spawner) {
 
     // Turn on the basic GGA and RMC info (what you typically want)
     let cmd = pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::default();
-    gps.command(cmd).await.ok();
+    gps.send_command(cmd).await.ok();
 
     // Set update rate to once a second (1hz) which is what you typically want.
     let cmd = pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(1_000).unwrap();
-    gps.command(cmd).await.ok();
+    gps.send_command(cmd).await.ok();
 
     loop {
-        match gps.read_sentence().await {
-            Ok(raw) => if let Some(raw_sentence) = raw {
-                info!("{:?}\n", raw_sentence);
-                match gps.parse_sentence(&raw_sentence).await {
-                    //Ok(res) => info!("{:?}", res),
-                    Ok(_) => {},
-                    Err(e) => error!("gps.parse_sentence: {:?}", e),
-                }
-            }
-            Err(_) => {}
+        match gps.read_response().await {
+            Ok(Some(response)) => info!("gps.read_response ok: {:?}", response),
+            Ok(None) => {}
+            Err(e) => error!("gps.read_response err: {:?}", e),
         }
         //Timer::after_secs(3).await;
     }
