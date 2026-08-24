@@ -1,11 +1,9 @@
-use embedded_io_async::{ErrorType, Read, Write};
+use embedded_io_async::{ErrorType, Read};
 use heapless::Vec;
 use nmea::Nmea;
 use pmtk::response::PmtkResponse;
-use pmtk::traits::{Cmd, Q};
-use crate::{RawSentence, LINE_FEED, SENTENCE_MAX_LEN, GpsResponse};
+use crate::{GpsResponse, RawSentence, LINE_FEED, SENTENCE_MAX_LEN};
 use crate::error::GpsError;
-use crate::error::GpsError::UnexpectedNumBytes;
 
 pub(crate) struct GpsReader {
     buffer: [u8; SENTENCE_MAX_LEN],
@@ -79,26 +77,5 @@ impl GpsReader {
     fn reset_buffer(&mut self) {
         self.buffer = [0; 255];
         self.buffer_idx = 0;
-    }
-}
-
-pub(crate) struct GpsWriter {}
-
-impl GpsWriter {
-    /// Sends a PMTK command.
-    pub(crate) async fn send_command<UART: Write + ErrorType>(&mut self, uart: &mut UART, command: impl Cmd) -> Result<(), GpsError<UART::Error>> {
-        self.uart_write(uart, command.serialize()?.as_bytes()).await
-    }
-
-    /// Sends a PMTK query.
-    pub(crate) async fn send_query<UART: Write + ErrorType>(&mut self, uart: &mut UART, query: impl Q) -> Result<(), GpsError<UART::Error>> {
-        self.uart_write(uart, query.serialize()?.as_bytes()).await
-    }
-
-    async fn uart_write<UART: Write + ErrorType>(&mut self, uart: &mut UART, buf: &[u8]) -> Result<(), GpsError<UART::Error>> {
-        if buf.len() != uart.write(buf).await.map_err(GpsError::Uart)? {
-            return Err(UnexpectedNumBytes) // TODO not happy with the name of this error
-        }
-        Ok(())
     }
 }
