@@ -7,10 +7,16 @@ use {defmt_rtt as _, panic_probe as _};
 use embassy_executor::Spawner;
 use embassy_rp::bind_interrupts;
 use embassy_rp::peripherals::UART0;
-use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, BufferedUartRx, Config};
+use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, BufferedUartRx, BufferedUartTx, Config};
 use embassy_time::Timer;
 use static_cell::StaticCell;
 use adafruit_ultimate_gps::{pmtk, GpsRx, GpsTx};
+use adafruit_ultimate_gps::GpsResponse::Pmtk;
+use adafruit_ultimate_gps::pmtk::cmd::full_cold_start::FullColdStartCmd;
+use adafruit_ultimate_gps::pmtk::dt::nmea_output::Frequency::{Disabled, OnceEveryFivePositionFixes, OnceEveryOnePositionFix};
+use adafruit_ultimate_gps::pmtk::q::dgps_mode::DgpsModeQ;
+use adafruit_ultimate_gps::pmtk::q::nmea_output::NmeaOutputQ;
+use adafruit_ultimate_gps::pmtk::q::release::ReleaseQ;
 
 bind_interrupts!(struct Irqs {
     UART0_IRQ => BufferedInterruptHandler<UART0>;
@@ -31,34 +37,55 @@ async fn main(spawner: Spawner) {
 
     let (tx, rx) = uart.split();
     let gps_rx = GpsRx::new(rx);
-    let mut gps_tx = GpsTx::new(tx);
+    let gps_tx = GpsTx::new(tx);
 
-    spawner.spawn(gps_reader(gps_rx).unwrap());
+    spawner.spawn(gps_rx_task(gps_rx).unwrap());
+    spawner.spawn(gps_tx_task(gps_tx).unwrap());
+}
 
-    // Turn on the basic GGA and RMC info (what you typically want)
-    let cmd = pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::default();
-    gps_tx.command(cmd).await.ok();
-
-    // Set update rate to once a second (1hz) which is what you typically want.
-    let cmd = pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(1_000).unwrap();
-    // TODO still not seeing Ack responses from either cmd above...
-    gps_tx.command(cmd).await.ok();
-
-    info!("entering main loop...");
+#[embassy_executor::task]
+async fn gps_rx_task(mut gps_rx: GpsRx<BufferedUartRx>) {
+    info!("gps_rx task");
     loop {
-        gps_tx.command(cmd).await.ok();
-        Timer::after_secs(3).await;
+        match gps_rx.read_raw().await {
+            Ok(Some(raw)) => info!("{:?}", raw),
+            // Ok(Some(response)) => match response {
+            //     Pmtk(_) => info!("{:?}", response),
+            //     _ => {}
+            // }
+            Ok(None) => {}
+            Err(e) => error!("{:?}", e),
+        }
     }
 }
 
 #[embassy_executor::task]
-async fn gps_reader(mut gps_rx: GpsRx<BufferedUartRx>) {
-    info!("gps_reader task");
+async fn gps_tx_task(mut gps_tx: GpsTx<BufferedUartTx>) {
+    info!("gps_tx task");
+    // Turn on the basic GGA and RMC info (what you typically want)
+    // let cmd = pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
+    //     OnceEveryFivePositionFixes,
+    //     OnceEveryFivePositionFixes,
+    //     OnceEveryFivePositionFixes,
+    //     OnceEveryFivePositionFixes,
+    //     OnceEveryFivePositionFixes,
+    //     OnceEveryFivePositionFixes,
+    //     Disabled
+    // );
+    // gps_tx.command(cmd).await.ok();
+    //
+    // // Set update rate to once a second (1hz) which is what you typically want.
+    // let cmd = pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(1_000).unwrap();
+    // gps_tx.command(cmd).await.ok();
+
+    // "It’s essentially a Cold Restart, but additionally clear system/user configurations at
+    // re-start. That is, reset the receiver to the factory status."
+    gps_tx.command(FullColdStartCmd {}).await.ok();
+
     loop {
-        match gps_rx.read().await {
-            Ok(Some(response)) => info!("gps.read ok: {:?}", response),
-            Ok(None) => {}
-            Err(e) => error!("gps.read err: {:?}", e),
-        }
+        gps_tx.query(ReleaseQ {}).await.ok();
+        gps_tx.query(DgpsModeQ {}).await.ok();
+        gps_tx.query(NmeaOutputQ {}).await.ok();
+        Timer::after_secs(3).await;
     }
 }

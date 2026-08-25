@@ -1,8 +1,8 @@
 use core::str::Utf8Error;
-use defmt::Format;
 use pmtk::error::PmtkError;
 
-#[derive(Debug, Format)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[derive(Debug)]
 pub enum GpsError<UART> {
     Nmea, // TODO wrap
     Overflow,
@@ -10,7 +10,6 @@ pub enum GpsError<UART> {
     PmtkParseDt,
     Uart(UART),
     Utf8, // TODO needs to be stand-alone?
-    UnexpectedNumBytes,
 }
 
 impl<UART> From<Utf8Error> for GpsError<UART> {

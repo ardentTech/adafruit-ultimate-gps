@@ -13,7 +13,7 @@ embedded-io-async = "0.7.0"
 embassy-rp = { version = "0.10.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp235xa", "binary-info"] }
 embassy-time = { version = "0.5.1", features = ["defmt", "defmt-timestamp-uptime"] }
 heapless = { version = "0.9.3", features = ["defmt"] }
-adafruit-ultimate-gps = { path = "../../../" }
+adafruit-ultimate-gps = { path = "../../../", features = ["defmt"] }
 panic-probe = { version = "1.0.0", features = ["print-defmt"] }
 static_cell = "2.1.1"
 

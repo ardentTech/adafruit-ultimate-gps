@@ -1080,8 +1080,9 @@ dependencies = [
 
 [[package]]
 name = "pmtk"
-version = "0.2.0"
-source = "git+https://github.com/ardentTech/pmtk.git#11798ed262da623ad1d7219f113bc7c67522bc0f"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9310c0c7528edc7cf2888dd9d2dacc2e4ede58e951e3f16330a70f237417c47"
 dependencies = [
  "defmt",
  "heapless",
