@@ -1,11 +1,14 @@
+use crate::error::GpsError;
+use crate::types::SENTENCE_MAX_LEN;
+use crate::types::{GpsResponse, RawSentence};
 #[cfg(feature = "defmt")]
 use defmt::debug;
 use embedded_io_async::{ErrorType, Read};
 use heapless::Vec;
 use nmea::Nmea;
 use pmtk::response::PmtkResponse;
-use crate::{GpsResponse, RawSentence, LINE_FEED, SENTENCE_MAX_LEN};
-use crate::error::GpsError;
+
+const LINE_FEED: u8 = 0x0a; // '\n'
 
 pub(crate) struct GpsReader {
     buffer: [u8; SENTENCE_MAX_LEN],

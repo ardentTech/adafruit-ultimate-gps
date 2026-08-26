@@ -8,7 +8,9 @@ pub enum GpsError<UART> {
     Overflow,
     Pmtk, // TODO wrap
     PmtkParseDt,
+    Todo,
     Uart(UART),
+    UnAck,
     Utf8, // TODO needs to be stand-alone?
 }
 

@@ -1,5 +1,5 @@
 # Adafruit Ultimate GPS
-`#![no-std]`, `async`-first driver for the (https://www.adafruit.com/product/746)[Adafruit Ultimate GPS breakout].
+`#![no-std]`, `async`-first driver for the [Adafruit Ultimate GPS breakout](https://www.adafruit.com/product/746).
 
 ### Features
 

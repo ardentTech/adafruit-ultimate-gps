@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use defmt::{error, info};
+use defmt::{error, info, warn};
 #[allow(unused_imports)]
 use {defmt_rtt as _, panic_probe as _};
 use embassy_executor::Spawner;
@@ -9,7 +9,9 @@ use embassy_rp::bind_interrupts;
 use embassy_rp::peripherals::UART0;
 use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, Config};
 use static_cell::StaticCell;
-use adafruit_ultimate_gps::{pmtk as pmtk, Gps};
+use adafruit_ultimate_gps::{pmtk as pmtk};
+use pmtk::dt::nmea_output::Frequency;
+use adafruit_ultimate_gps::half_duplex::Gps;
 
 bind_interrupts!(struct Irqs {
     UART0_IRQ => BufferedInterruptHandler<UART0>;
@@ -30,20 +32,31 @@ async fn main(_spawner: Spawner) {
 
     let mut gps = Gps::new(uart);
 
-    // Turn on the basic GGA and RMC info (what you typically want)
-    let cmd = pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::default();
-    gps.command(cmd).await.ok();
+    let cmd = pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
+        Frequency::OnceEveryFivePositionFixes,
+        Frequency::Disabled,
+        Frequency::Disabled,
+        Frequency::Disabled,
+        Frequency::Disabled,
+        Frequency::Disabled,
+        Frequency::Disabled,
+    );
+    // send command and verify
+    match gps.send_and_verify(cmd, 8).await {
+        Ok(v) => if v { info!("verified: {}", cmd) } else { warn!("unverified: {}", cmd) },
+        Err(e) => error!("{:?}", e),
+    }
 
-    // Set update rate to once a second (1hz) which is what you typically want.
+    // send command and do not verify
     let cmd = pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(1_000).unwrap();
-    gps.command(cmd).await.ok();
+    gps.send(cmd).await.unwrap();
 
     loop {
+        // read parsed sentences
         match gps.read().await {
             Ok(Some(response)) => info!("gps.read ok: {:?}", response),
-            Ok(None) => {}
+            Ok(None) => info!("gps.read none"),
             Err(e) => error!("gps.read err: {:?}", e),
         }
-        //Timer::after_secs(3).await;
     }
 }
