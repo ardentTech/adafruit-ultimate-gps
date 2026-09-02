@@ -4,24 +4,20 @@ use pmtk::error::PmtkError;
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum GpsError<UART> {
-    Nmea, // TODO wrap
-    Overflow,
-    Pmtk, // TODO wrap
-    PmtkParseDt,
-    Todo,
+    Nmea, // TODO wrap nmea::Error (will need lifetime...)
+    Pmtk(PmtkError),
     Uart(UART),
-    UnAck,
-    Utf8, // TODO needs to be stand-alone?
+    Utf8(Utf8Error),
 }
 
 impl<UART> From<Utf8Error> for GpsError<UART> {
-    fn from(_: Utf8Error) -> Self {
-        Self::Utf8
+    fn from(e: Utf8Error) -> Self {
+        Self::Utf8(e)
     }
 }
 
 impl<UART> From<PmtkError> for GpsError<UART> {
-    fn from(_: PmtkError) -> Self {
-        Self::Pmtk
+    fn from(e: PmtkError) -> Self {
+        Self::Pmtk(e)
     }
 }

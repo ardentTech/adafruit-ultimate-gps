@@ -4,7 +4,7 @@ use crate::types::{GpsResponse, RawSentence};
 #[cfg(feature = "defmt")]
 use defmt::debug;
 use embedded_io_async::{ErrorType, Read};
-use heapless::Vec;
+use heapless::{String, Vec};
 use nmea::Nmea;
 use pmtk::response::PmtkResponse;
 
@@ -71,9 +71,13 @@ impl GpsReader {
                         self.buffer[self.buffer_idx] = *b;
 
                         if *b == LINE_FEED {
-                            //debug!("raw setence: {}", &self.buffer[..=self.buffer_idx]);
+                            #[cfg(feature = "defmt")]
+                            debug!("raw sentence: {}", &self.buffer[..=self.buffer_idx]);
                             let v = <Vec<u8, SENTENCE_MAX_LEN>>::try_from(&self.buffer[..=self.buffer_idx]).unwrap(); // TODO remove unwrap()
-                            res = Ok(Some(RawSentence::from_utf8(v).unwrap())); // TODO remove unwrap()
+                            res = match RawSentence::from_utf8(v) {
+                                Ok(raw) => Ok(Some(raw)),
+                                Err(e) => Err(GpsError::Utf8(e))
+                            };
                             self.reset_buffer();
                         } else {
                             if self.buffer_idx + 1 == SENTENCE_MAX_LEN {

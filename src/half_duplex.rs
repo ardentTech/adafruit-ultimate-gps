@@ -1,9 +1,11 @@
 use crate::error::GpsError;
 use crate::reader::GpsReader;
-use crate::types::GpsResponse;
+use crate::types::{GpsResponse, RawSentence};
 use crate::writer::GpsWriter;
 use embedded_io_async::{ErrorType, Read, Write};
+use pmtk::cmd::locus_stop_logger::LocusStopLogger;
 use pmtk::dt::ack::AckFlag;
+use pmtk::q::locus_data::LocusDataQ;
 use pmtk::response::PmtkResponse;
 use pmtk::traits::{CmdQ, Packet};
 
@@ -16,6 +18,14 @@ pub struct Gps<UART> {
 impl<UART: Read + Write + ErrorType> Gps<UART> {
     pub fn new(uart: UART) -> Self {
         Self { rx: GpsReader::default(), tx: GpsWriter {}, uart }
+    }
+
+    pub async fn read(&mut self) -> Result<Option<GpsResponse>, GpsError<UART::Error>> {
+        self.rx.read_response(&mut self.uart).await
+    }
+
+    pub async fn read_raw(&mut self) -> Result<Option<RawSentence>, GpsError<UART::Error>> {
+        self.rx.read_sentence(&mut self.uart).await
     }
 
     pub async fn send(&mut self, request: impl CmdQ) -> Result<(), GpsError<UART::Error>> {
@@ -48,7 +58,11 @@ impl<UART: Read + Write + ErrorType> Gps<UART> {
         Ok(verified)
     }
 
-    pub async fn read(&mut self) -> Result<Option<GpsResponse>, GpsError<UART::Error>> {
-        self.rx.read_response(&mut self.uart).await
+    pub async fn start_logger(&mut self) -> Result<(), GpsError<UART::Error>> {
+        self.send(LocusStopLogger::new(false)).await
+    }
+
+    pub async fn query_logger(&mut self) -> Result<(), GpsError<UART::Error>> {
+        self.send(LocusDataQ::new(false)).await
     }
 }

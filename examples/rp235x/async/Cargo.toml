@@ -34,3 +34,10 @@ path = "src/bin/full_duplex.rs"
 test = false
 doctest = false
 bench = false
+
+[[bin]]
+name = "logging"
+path = "src/bin/logging.rs"
+test = false
+doctest = false
+bench = false
