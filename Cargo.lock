@@ -170,7 +170,7 @@ dependencies = [
 [[package]]
 name = "pmtk"
 version = "0.3.0"
-source = "git+https://github.com/ardentTech/pmtk.git?rev=3648ea5#3648ea5e355cc735bc4cd6d4935b10b5a1075ab4"
+source = "git+https://github.com/ardentTech/pmtk.git?rev=da2e9ce#da2e9cee319bca38ebebc9965bf29717d925fc74"
 dependencies = [
  "defmt",
  "heapless",

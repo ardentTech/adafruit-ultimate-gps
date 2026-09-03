@@ -2,9 +2,9 @@ use crate::error::GpsError;
 use crate::types::SENTENCE_MAX_LEN;
 use crate::types::{GpsResponse, RawSentence};
 #[cfg(feature = "defmt")]
-use defmt::debug;
+use defmt::{debug, error, info};
 use embedded_io_async::{ErrorType, Read};
-use heapless::{String, Vec};
+use heapless::Vec;
 use nmea::Nmea;
 use pmtk::response::PmtkResponse;
 
@@ -28,14 +28,29 @@ impl GpsReader {
         debug!("GpsReader.parse_sentence()");
         match self.parse_nmea_sentence::<UART>(sentence).await {
             Ok(res) => Ok(res),
-            Err(_) => self.parse_pmtk_sentence::<UART>(sentence).await,
+            Err(e) => {
+                #[cfg(feature = "defmt")]
+                error!("NMEA error: {:?}", sentence);
+                match e {
+                    // if nmea couldn't parse the sentence, try pmtk
+                    nmea::Error::ParsingError(_) => match self.parse_pmtk_sentence::<UART>(sentence).await {
+                        Ok(res) => Ok(res),
+                        Err(e) => {
+                            #[cfg(feature = "defmt")]
+                            info!("GpsReader.parse_sentence() failed: {}", sentence);
+                            Err(e)
+                        },
+                    },
+                    _ => Err(GpsError::Nmea)
+                }
+            }
         }
     }
 
-    async fn parse_nmea_sentence<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
+    async fn parse_nmea_sentence<'a, UART: Read + ErrorType>(&mut self, sentence: &'a RawSentence) -> Result<GpsResponse, nmea::Error<'a>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.parse_nmea_sentence()");
-        Ok(GpsResponse::Nmea(self.nmea.parse(sentence).map_err(|_| GpsError::Nmea)?))
+        Ok(GpsResponse::Nmea(self.nmea.parse(sentence)?))
     }
 
     async fn parse_pmtk_sentence<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
@@ -76,7 +91,7 @@ impl GpsReader {
                             let v = <Vec<u8, SENTENCE_MAX_LEN>>::try_from(&self.buffer[..=self.buffer_idx]).unwrap(); // TODO remove unwrap()
                             res = match RawSentence::from_utf8(v) {
                                 Ok(raw) => Ok(Some(raw)),
-                                Err(e) => Err(GpsError::Utf8(e))
+                                Err(_) => Err(GpsError::Utf8)
                             };
                             self.reset_buffer();
                         } else {

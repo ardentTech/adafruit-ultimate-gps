@@ -14,8 +14,6 @@ use adafruit_ultimate_gps::full_duplex::{GpsRx, GpsTx};
 use adafruit_ultimate_gps::pmtk;
 use adafruit_ultimate_gps::pmtk::cmd::full_cold_start::FullColdStartCmd;
 use adafruit_ultimate_gps::pmtk::dt::nmea_output::Frequency;
-use adafruit_ultimate_gps::pmtk::q::dgps_mode::DgpsModeQ;
-use adafruit_ultimate_gps::pmtk::q::nmea_output::NmeaOutputQ;
 use adafruit_ultimate_gps::pmtk::q::release::ReleaseQ;
 
 bind_interrupts!(struct Irqs {
@@ -39,13 +37,27 @@ async fn main(spawner: Spawner) {
     let gps_rx = GpsRx::new(rx);
     let gps_tx = GpsTx::new(tx);
 
+    //spawner.spawn(gps_rx_raw_task(gps_rx).unwrap());
     spawner.spawn(gps_rx_task(gps_rx).unwrap());
     spawner.spawn(gps_tx_task(gps_tx).unwrap());
 }
 
 #[embassy_executor::task]
 async fn gps_rx_task(mut gps_rx: GpsRx<BufferedUartRx>) {
-    info!("gps_rx task");
+    info!("gps_rx_task");
+    loop {
+        // read parsed sentences
+        match gps_rx.read().await {
+            Ok(Some(res)) => info!("{:?}", res),
+            Ok(None) => {}
+            Err(e) => error!("{:?}", e),
+        }
+    }
+}
+
+#[embassy_executor::task]
+async fn gps_rx_raw_task(mut gps_rx: GpsRx<BufferedUartRx>) {
+    info!("gps_rx_raw_task");
     loop {
         // read raw sentences
         match gps_rx.read_raw().await {
@@ -62,7 +74,7 @@ async fn gps_tx_task(mut gps_tx: GpsTx<BufferedUartTx>) {
 
     // "It’s essentially a Cold Restart, but additionally clear system/user configurations at
     // re-start. That is, reset the receiver to the factory status."
-    gps_tx.send(FullColdStartCmd {}).await.ok();
+    // TODO might need a delay? gps_tx.send(FullColdStartCmd {}).await.ok();
 
     gps_tx.send(
         pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
@@ -80,5 +92,6 @@ async fn gps_tx_task(mut gps_tx: GpsTx<BufferedUartTx>) {
         pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(1_000).unwrap()
     ).await.ok();
 
+    Timer::after_millis(3_000).await;
     gps_tx.send(ReleaseQ {}).await.ok();
 }

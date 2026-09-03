@@ -7,12 +7,12 @@ pub enum GpsError<UART> {
     Nmea, // TODO wrap nmea::Error (will need lifetime...)
     Pmtk(PmtkError),
     Uart(UART),
-    Utf8(Utf8Error),
+    Utf8,
 }
 
 impl<UART> From<Utf8Error> for GpsError<UART> {
-    fn from(e: Utf8Error) -> Self {
-        Self::Utf8(e)
+    fn from(_: Utf8Error) -> Self {
+        Self::Utf8
     }
 }
 
