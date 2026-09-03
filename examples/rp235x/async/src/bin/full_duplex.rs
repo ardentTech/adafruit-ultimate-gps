@@ -78,10 +78,10 @@ async fn gps_tx_task(mut gps_tx: GpsTx<BufferedUartTx>) {
 
     gps_tx.send(
         pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
+            Frequency::Disabled,
             Frequency::OnceEveryFivePositionFixes,
             Frequency::Disabled,
-            Frequency::Disabled,
-            Frequency::Disabled,
+            Frequency::OnceEveryFivePositionFixes,
             Frequency::Disabled,
             Frequency::Disabled,
             Frequency::Disabled,

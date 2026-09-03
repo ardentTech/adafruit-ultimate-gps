@@ -5,7 +5,7 @@ use crate::types::{GpsResponse, RawSentence};
 use defmt::{debug, error, info};
 use embedded_io_async::{ErrorType, Read};
 use heapless::Vec;
-use nmea::Nmea;
+use nmea::{parse_str, Nmea};
 use pmtk::response::PmtkResponse;
 
 const LINE_FEED: u8 = 0x0a; // '\n'
@@ -29,15 +29,11 @@ impl GpsReader {
         match self.parse_nmea_sentence::<UART>(sentence).await {
             Ok(res) => Ok(res),
             Err(e) => {
-                #[cfg(feature = "defmt")]
-                error!("NMEA error: {:?}", sentence);
                 match e {
                     // if nmea couldn't parse the sentence, try pmtk
                     nmea::Error::ParsingError(_) => match self.parse_pmtk_sentence::<UART>(sentence).await {
                         Ok(res) => Ok(res),
                         Err(e) => {
-                            #[cfg(feature = "defmt")]
-                            info!("GpsReader.parse_sentence() failed: {}", sentence);
                             Err(e)
                         },
                     },
@@ -50,7 +46,7 @@ impl GpsReader {
     async fn parse_nmea_sentence<'a, UART: Read + ErrorType>(&mut self, sentence: &'a RawSentence) -> Result<GpsResponse, nmea::Error<'a>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.parse_nmea_sentence()");
-        Ok(GpsResponse::Nmea(self.nmea.parse(sentence)?))
+        Ok(GpsResponse::Nmea(parse_str(sentence)?))
     }
 
     async fn parse_pmtk_sentence<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
