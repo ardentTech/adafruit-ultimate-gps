@@ -3,7 +3,7 @@
 
 ### Features
 
-- `defmt`: configure desired host log level with `$ export DEFMT_LOG=warn`
+- `defmt`: configure desired host log level with `$ export DEFMT_LOG=info`
 
 ### TODO
 

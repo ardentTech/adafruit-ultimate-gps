@@ -6,6 +6,7 @@ version = 4
 name = "adafruit-ultimate-gps"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "defmt",
  "embedded-io-async 0.7.0",
  "heapless",

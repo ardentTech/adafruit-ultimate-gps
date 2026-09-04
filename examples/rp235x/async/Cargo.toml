@@ -39,3 +39,10 @@ path = "src/bin/logging.rs"
 test = false
 doctest = false
 bench = false
+
+[[bin]]
+name = "simple"
+path = "src/bin/simple.rs"
+test = false
+doctest = false
+bench = false
