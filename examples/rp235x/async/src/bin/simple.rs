@@ -36,9 +36,9 @@ async fn main(_spawner: Spawner) {
 
     loop {
         // read parsed sentences
-        match gps.read_sentence().await {
-            Ok(response) => info!("gps.read_sentence ok: {:?}", response),
-            Err(e) => error!("gps.read_sentence err: {:?}", e),
+        match gps.read().await {
+            Ok(response) => info!("gps.read ok: {:?}", response),
+            Err(e) => error!("gps.read err: {:?}", e),
         }
     }
 }
