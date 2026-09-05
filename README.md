@@ -1,5 +1,5 @@
 # Adafruit Ultimate GPS
-`#![no-std]`, `async`-first driver for the [Adafruit Ultimate GPS breakout](https://www.adafruit.com/product/746).
+`#![no-std]`, `async`-first driver and toolkit for the [Adafruit Ultimate GPS breakout](https://www.adafruit.com/product/746).
 
 ### Features
 
@@ -11,3 +11,4 @@
 - [ ] `full_duplex` feature (should be default?)
 - [ ] LOCUS integration
 - [ ] verify flag for requests
+- [ ] refactor `unwrap()`s

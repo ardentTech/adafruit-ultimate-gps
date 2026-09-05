@@ -4,10 +4,9 @@ use pmtk::error::PmtkError;
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum GpsError<UART> {
-    Nmea, // TODO wrap nmea::Error (will need lifetime...)
+    Nmea, // TODO wrap nmea::Error? (would need explicit lifetime...)
     Pmtk(PmtkError),
     Uart(UART),
-    Unexpected,
     Utf8,
 }
 

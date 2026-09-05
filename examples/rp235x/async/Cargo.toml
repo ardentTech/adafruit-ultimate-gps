@@ -20,27 +20,6 @@ static_cell = "2.1.1"
 debug = true
 
 [[bin]]
-name = "half_duplex"
-path = "src/bin/half_duplex.rs"
-test = false
-doctest = false
-bench = false
-
-[[bin]]
-name = "full_duplex"
-path = "src/bin/full_duplex.rs"
-test = false
-doctest = false
-bench = false
-
-[[bin]]
-name = "logging"
-path = "src/bin/logging.rs"
-test = false
-doctest = false
-bench = false
-
-[[bin]]
 name = "simple"
 path = "src/bin/simple.rs"
 test = false

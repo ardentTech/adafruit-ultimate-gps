@@ -1,15 +1,8 @@
 use chrono::{NaiveDate, NaiveTime};
-use embedded_io_async::{ErrorType, Read, Write};
-use nmea::ParseResult;
-use nmea::sentences::{FaaMode, FixType, GgaData, GllData, RmcData};
 use nmea::sentences::rmc::{RmcNavigationStatus, RmcStatusOfFix};
-use pmtk::dt::nmea_output::Frequency;
-use pmtk::traits::CmdQ;
-use crate::error::GpsError;
-use crate::reader::GpsReader;
-use crate::types::GpsResponse;
-use crate::writer::GpsWriter;
+use nmea::sentences::{FaaMode, FixType, GgaData, GllData, RmcData};
 
+/// GPS data composed of GGA, RMC and GLL payloads.
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub struct Reading {
@@ -34,6 +27,8 @@ pub struct Reading {
 }
 
 impl Reading {
+
+    /// Constructs a new instance prioritizing GGA data over RMC data over GLL data.
     pub fn new(gga: GgaData, gll: GllData, rmc: RmcData) -> Self {
         // GGA
         let mut reading = Self {
@@ -86,64 +81,5 @@ impl Reading {
         }
         reading.faa_mode = gll.faa_mode;
         reading
-    }
-}
-
-pub struct Adafruit<UART> {
-    rx: GpsReader,
-    tx: GpsWriter,
-    uart: UART,
-}
-
-// GGA (GLL backup) + RMC
-impl<UART: Read + Write + ErrorType> Adafruit<UART> {
-
-    pub fn new(uart: UART) -> Self {
-        Self { rx: GpsReader::default(), tx: GpsWriter {}, uart }
-    }
-
-    pub async fn read(&mut self) -> Result<Reading, GpsError<UART::Error>> {
-        let mut gga: Option<GgaData> = None;
-        let mut gll: Option<GllData> = None;
-        let mut rmc: Option<RmcData> = None;
-
-        while gga.is_none() | gll.is_none() | rmc.is_none() {
-            match self.rx.read_response(&mut self.uart).await? {
-                Some(gps_res) => match gps_res {
-                    GpsResponse::Nmea(nmea_res) => match nmea_res {
-                        ParseResult::GGA(data) => gga = Some(data),
-                        ParseResult::GLL(data) => gll = Some(data),
-                        ParseResult::RMC(data) => rmc = Some(data),
-                        _ => {}
-                    }
-                    _ => {}
-                }
-                _ => {}
-            }
-        }
-
-        Ok(Reading::new(gga.unwrap(), gll.unwrap(), rmc.unwrap()))
-    }
-
-    pub async fn send(&mut self, command: impl CmdQ) -> Result<(), GpsError<UART::Error>> {
-        self.tx.send(&mut self.uart, command).await
-    }
-
-    // configures the chip for GGA, GLL and RMC
-    pub async fn start(&mut self, frequency_ms: u16) -> Result<(), GpsError<UART::Error>> {
-        self.tx.send(&mut self.uart, pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
-            Frequency::OnceEveryFivePositionFixes,
-            Frequency::OnceEveryFivePositionFixes,
-            Frequency::Disabled,
-            Frequency::OnceEveryFivePositionFixes,
-            Frequency::Disabled,
-            Frequency::Disabled,
-            Frequency::Disabled,
-        )).await?;
-
-        self.tx.send(
-            &mut self.uart,
-            pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(frequency_ms)?
-        ).await
     }
 }
