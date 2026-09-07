@@ -37,7 +37,7 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGPS<UART> {
         let mut rmc: Option<RmcData> = None;
 
         while gga.is_none() | gll.is_none() | rmc.is_none() {
-            match self.read_response().await? {
+            match self.rx.read_response(&mut self.uart).await? {
                 Some(gps_res) => match gps_res {
                     GpsResponse::Nmea(nmea_res) => match nmea_res {
                         ParseResult::GGA(data) => gga = Some(data),
@@ -53,22 +53,7 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGPS<UART> {
         Ok(Reading::new(gga.unwrap(), gll.unwrap(), rmc.unwrap()))
     }
 
-    /// Reads a sentence and attempts to parse it as NMEA and then, if necessary, PMTK.
-    pub async fn read_response(&mut self) -> Result<Option<GpsResponse>, GpsError<UART::Error>> {
-        #[cfg(feature = "defmt")]
-        debug!("AdafruitUltimateGPS.read_response()");
-        match self.rx.read_sentence(&mut self.uart).await {
-            Ok(res) => if let Some(raw) = res {
-                match self.rx.parse::<UART>(&raw).await {
-                    Ok(res) => Ok(Some(res)),
-                    Err(e) => Err(e)
-                }
-            } else { Ok(None) },
-            Err(e) => Err(e)
-        }
-    }
-
-    /// Reads a raw 256-byte sentence.
+    /// Reads a raw NMEA or PMTK sentence.
     pub async fn read_sentence(&mut self) -> Result<Option<RawSentence>, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("AdafruitUltimateGPS.read_sentence()");
@@ -87,6 +72,7 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGPS<UART> {
         #[cfg(feature = "defmt")]
         debug!("AdafruitUltimateGPS.start()");
         self.tx.send(&mut self.uart, pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
+            // TODO change pmtk lib bc unnamed params here suck
             Frequency::OnceEveryFivePositionFixes,
             Frequency::OnceEveryFivePositionFixes,
             Frequency::Disabled,

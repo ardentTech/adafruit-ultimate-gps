@@ -2,7 +2,14 @@
 name = "adafruit-ultimate-gps"
 version = "0.1.0"
 edition = "2024"
+authors = ["Jonathan D. Baker <jonathan@ardent.tech>"]
+description = "A no-std driver for the Adafruit Ultimate GPS breakout board."
+keywords = ["embedded", "gps", "mt3339"]
+categories = ["embedded", "no-std"]
+repository = "https://github.com/ardentTech/adafruit-ultimate-gps"
+license = "MIT OR Apache-2.0"
 exclude = ["CHANGELOG.md", "examples/*"]
+readme = "README.md"
 
 [dependencies]
 chrono = { version = "0.4.45", default-features = false }

@@ -5,19 +5,27 @@ edition = "2024"
 publish = false
 
 [dependencies]
+adafruit-ultimate-gps = { path = "../../../", features = ["defmt"] }
 cortex-m-rt = "0.7.5"
 defmt = "1.1.0"
 defmt-rtt = "1.2.0"
 embassy-executor = { version = "0.10.0", features = ["platform-cortex-m", "executor-thread", "executor-interrupt", "defmt"] }
 embassy-rp = { version = "0.10.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp235xa", "binary-info"] }
 embassy-time = { version = "0.5.1", features = ["defmt", "defmt-timestamp-uptime"] }
-adafruit-ultimate-gps = { path = "../../../", features = ["defmt"] }
+embedded-io-async = { version = "0.7.0", features = ["defmt"] }
 panic-probe = { version = "1.0.0", features = ["print-defmt"] }
 static_cell = "2.1.1"
 
 [profile.release]
 # Enable generation of debug symbols even on release builds
 debug = true
+
+[[bin]]
+name = "full_duplex"
+path = "src/bin/full_duplex.rs"
+test = false
+doctest = false
+bench = false
 
 [[bin]]
 name = "half_duplex"

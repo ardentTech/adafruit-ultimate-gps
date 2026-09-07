@@ -1,8 +1,8 @@
 #![no_std]
 
-mod error;
-mod reader;
-mod writer;
-mod types;
+pub mod error;
+pub mod reader;
+pub mod writer;
+pub mod types;
 pub mod driver;
 pub use pmtk;

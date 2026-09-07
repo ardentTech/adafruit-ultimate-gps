@@ -95,7 +95,7 @@ impl Reading {
     }
 }
 
-pub(crate) struct GpsReader {
+pub struct GpsReader {
     buffer: [u8; SENTENCE_MAX_LEN],
     buffer_idx: usize,
 }
@@ -107,7 +107,9 @@ impl Default for GpsReader {
 }
 
 impl GpsReader {
-    pub(crate) async fn parse<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
+
+    /// Parses a sentence into a NMEA or, if necessary, a PMTK response.
+    pub async fn parse<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.parse()");
         match self.parse_nmea::<UART>(sentence).await {
@@ -139,7 +141,23 @@ impl GpsReader {
         Ok(GpsResponse::Pmtk(PmtkResponse::try_from(sentence.as_bytes())?))
     }
 
-    pub(crate) async fn read_sentence<UART: Read + ErrorType>(&mut self, uart: &mut UART) -> Result<Option<RawSentence>, GpsError<UART::Error>> {
+    /// Reads a sentence and parses it into a response.
+    pub async fn read_response<UART: Read + ErrorType>(&mut self, uart: &mut UART) -> Result<Option<GpsResponse>, GpsError<UART::Error>> {
+        #[cfg(feature = "defmt")]
+        debug!("GpsReader.read_response()");
+        match self.read_sentence(uart).await {
+            Ok(res) => if let Some(raw) = res {
+                match self.parse::<UART>(&raw).await {
+                    Ok(res) => Ok(Some(res)),
+                    Err(e) => Err(e)
+                }
+            } else { Ok(None) },
+            Err(e) => Err(e)
+        }
+    }
+
+    /// Reads a raw sentence from the UART.
+    pub async fn read_sentence<UART: Read + ErrorType>(&mut self, uart: &mut UART) -> Result<Option<RawSentence>, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.read_sentence()");
         let mut buf = [0u8; SENTENCE_MAX_LEN];
