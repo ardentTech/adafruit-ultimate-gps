@@ -1,3 +1,6 @@
+//! This example demonstrates how to use the half-duplex AdafruitUltimateGps driver on a
+//! [RP Pico 2W](https://www.adafruit.com/product/6087).
+
 #![no_std]
 #![no_main]
 
@@ -9,7 +12,7 @@ use embassy_rp::bind_interrupts;
 use embassy_rp::peripherals::UART0;
 use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, Config};
 use static_cell::StaticCell;
-use adafruit_ultimate_gps::driver::AdafruitGPS;
+use adafruit_ultimate_gps::driver::AdafruitUltimateGPS;
 
 bind_interrupts!(struct Irqs {
     UART0_IRQ => BufferedInterruptHandler<UART0>;
@@ -28,7 +31,7 @@ async fn main(_spawner: Spawner) {
     config.baudrate = 9600;
     let uart = BufferedUart::new(uart, tx_pin, rx_pin, Irqs, tx_buf, rx_buf, config);
 
-    let mut gps = AdafruitGPS::new(uart);
+    let mut gps = AdafruitUltimateGPS::new(uart);
     gps.start(1_000).await.unwrap();
 
     loop {

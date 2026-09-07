@@ -1,8 +1,10 @@
 #[cfg(feature = "defmt")]
 use defmt::Format;
 use heapless::String;
-use nmea::{ParseResult, SentenceType};
+use nmea::ParseResult;
 use pmtk::response::PmtkResponse;
+
+pub const SENTENCE_MAX_LEN: usize = 255;
 
 pub type RawSentence = String<SENTENCE_MAX_LEN>;
 
@@ -39,5 +41,3 @@ impl Format for GpsResponse {
         }
     }
 }
-
-pub const SENTENCE_MAX_LEN: usize = 255;

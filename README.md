@@ -8,7 +8,8 @@
 ### TODO
 
 - [x] `defmt` feature
-- [ ] `full_duplex` feature (should be default?)
 - [ ] LOCUS integration
 - [ ] verify flag for requests
-- [ ] refactor `unwrap()`s
+- [x] refactor `unwrap()`s
+- [ ] `full_duplex` example
+- [ ] knock out TODOs

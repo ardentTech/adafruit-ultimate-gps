@@ -7,6 +7,7 @@ pub enum GpsError<UART> {
     Nmea, // TODO wrap nmea::Error? (would need explicit lifetime...)
     Pmtk(PmtkError),
     Uart(UART),
+    Unexpected,
     Utf8,
 }
 
