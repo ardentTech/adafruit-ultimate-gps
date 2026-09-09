@@ -7,6 +7,14 @@
 use defmt::{error, info};
 #[allow(unused_imports)]
 use {defmt_rtt as _, panic_probe as _};
+use adafruit_ultimate_gps::pmtk;
+use adafruit_ultimate_gps::pmtk::dt::nmea_output::Frequency;
+use adafruit_ultimate_gps::pmtk::q::release::ReleaseQ;
+use adafruit_ultimate_gps::pmtk::traits::CmdQ;
+use adafruit_ultimate_gps::reader::GpsReader;
+use adafruit_ultimate_gps::types::GpsError;
+use adafruit_ultimate_gps::types::{GpsResponse, RawSentence};
+use adafruit_ultimate_gps::writer::GpsWriter;
 use embassy_executor::Spawner;
 use embassy_rp::bind_interrupts;
 use embassy_rp::peripherals::UART0;
@@ -14,14 +22,6 @@ use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, BufferedUartRx, B
 use embassy_time::Timer;
 use embedded_io_async::{ErrorType, Read, Write};
 use static_cell::StaticCell;
-use adafruit_ultimate_gps::error::GpsError;
-use adafruit_ultimate_gps::pmtk;
-use adafruit_ultimate_gps::pmtk::dt::nmea_output::Frequency;
-use adafruit_ultimate_gps::pmtk::q::release::ReleaseQ;
-use adafruit_ultimate_gps::pmtk::traits::CmdQ;
-use adafruit_ultimate_gps::reader::GpsReader;
-use adafruit_ultimate_gps::types::{GpsResponse, RawSentence};
-use adafruit_ultimate_gps::writer::GpsWriter;
 
 // handles UART reads
 struct GpsRx<UART> {

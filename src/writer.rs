@@ -1,8 +1,8 @@
+use crate::types::GpsError;
 #[cfg(feature = "defmt")]
 use defmt::debug;
 use embedded_io_async::{ErrorType, Write};
 use pmtk::traits::CmdQ;
-use crate::error::GpsError;
 
 pub struct GpsWriter {}
 

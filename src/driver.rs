@@ -1,9 +1,9 @@
+use crate::reader::GpsReader;
+use crate::types::GpsError;
+use crate::types::{GpsReading, GpsResponse, RawSentence};
+use crate::writer::GpsWriter;
 #[cfg(feature = "defmt")]
 use defmt::debug;
-use crate::error::GpsError;
-use crate::reader::{GpsReader, Reading};
-use crate::types::{GpsResponse, RawSentence};
-use crate::writer::GpsWriter;
 use embedded_io_async::{ErrorType, Read, Write};
 use nmea::ParseResult;
 use nmea::sentences::{GgaData, GllData, RmcData};
@@ -12,26 +12,26 @@ use pmtk::traits::CmdQ;
 
 // TODO locus logger
 
-pub struct AdafruitUltimateGPS<UART> {
+pub struct AdafruitUltimateGps<UART> {
     rx: GpsReader,
     tx: GpsWriter,
     uart: UART,
 }
 
 // GGA (GLL backup) + RMC
-impl<UART: Read + Write + ErrorType> AdafruitUltimateGPS<UART> {
+impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
 
     /// Constructs a new driver instance.
     pub fn new(uart: UART) -> Self {
         #[cfg(feature = "defmt")]
-        debug!("AdafruitUltimateGPS.new()");
+        debug!("AdafruitUltimateGps.new()");
         Self { rx: GpsReader::default(), tx: GpsWriter {}, uart }
     }
 
-    /// Reads GPS data.
-    pub async fn read(&mut self) -> Result<Reading, GpsError<UART::Error>> {
+    /// Reads Gps data.
+    pub async fn read(&mut self) -> Result<GpsReading, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
-        debug!("AdafruitUltimateGPS.read()");
+        debug!("AdafruitUltimateGps.read()");
         let mut gga: Option<GgaData> = None;
         let mut gll: Option<GllData> = None;
         let mut rmc: Option<RmcData> = None;
@@ -43,40 +43,40 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGPS<UART> {
                         ParseResult::GGA(data) => gga = Some(data),
                         ParseResult::GLL(data) => gll = Some(data),
                         ParseResult::RMC(data) => rmc = Some(data),
-                        _ => {} // other NMEA responses aren't of interest
+                        _ => {} // other NMEA responses nop
                     }
-                    _ => {} // PMTK responses aren't of interest
+                    _ => {} // PMTK responses nop
                 }
-                _ => {} // errors are propagated above and Some(None) isn't of interest
+                _ => {} // nop as errors are propagated above
             }
         }
-        Ok(Reading::new(gga.unwrap(), gll.unwrap(), rmc.unwrap()))
+        Ok(GpsReading::new(gga.unwrap(), gll.unwrap(), rmc.unwrap()))
     }
 
     /// Reads a raw NMEA or PMTK sentence.
     pub async fn read_sentence(&mut self) -> Result<Option<RawSentence>, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
-        debug!("AdafruitUltimateGPS.read_sentence()");
+        debug!("AdafruitUltimateGps.read_sentence()");
         self.rx.read_sentence(&mut self.uart).await
     }
 
     /// Sends a PMTK command.
     pub async fn send(&mut self, command: impl CmdQ) -> Result<(), GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
-        debug!("AdafruitUltimateGPS.send()");
+        debug!("AdafruitUltimateGps.send()");
         self.tx.send(&mut self.uart, command).await
     }
 
-    /// Configures the chip for reading GPS data.
+    /// Configures the chip for reading Gps data.
     pub async fn start(&mut self, frequency_ms: u16) -> Result<(), GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
-        debug!("AdafruitUltimateGPS.start()");
+        debug!("AdafruitUltimateGps.start()");
         self.tx.send(&mut self.uart, pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
             // TODO change pmtk lib bc unnamed params here suck
-            Frequency::OnceEveryFivePositionFixes,
-            Frequency::OnceEveryFivePositionFixes,
+            Frequency::OnceEveryOnePositionFix,
+            Frequency::OnceEveryOnePositionFix,
             Frequency::Disabled,
-            Frequency::OnceEveryFivePositionFixes,
+            Frequency::OnceEveryOnePositionFix,
             Frequency::Disabled,
             Frequency::Disabled,
             Frequency::Disabled,

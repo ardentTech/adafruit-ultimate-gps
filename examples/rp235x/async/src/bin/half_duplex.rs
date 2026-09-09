@@ -12,7 +12,7 @@ use embassy_rp::bind_interrupts;
 use embassy_rp::peripherals::UART0;
 use embassy_rp::uart::{BufferedInterruptHandler, BufferedUart, Config};
 use static_cell::StaticCell;
-use adafruit_ultimate_gps::driver::AdafruitUltimateGPS;
+use adafruit_ultimate_gps::driver::AdafruitUltimateGps;
 
 bind_interrupts!(struct Irqs {
     UART0_IRQ => BufferedInterruptHandler<UART0>;
@@ -31,7 +31,7 @@ async fn main(_spawner: Spawner) {
     config.baudrate = 9600;
     let uart = BufferedUart::new(uart, tx_pin, rx_pin, Irqs, tx_buf, rx_buf, config);
 
-    let mut gps = AdafruitUltimateGPS::new(uart);
+    let mut gps = AdafruitUltimateGps::new(uart);
     gps.start(1_000).await.unwrap();
 
     loop {
