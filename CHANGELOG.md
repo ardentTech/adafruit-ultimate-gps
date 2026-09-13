@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - initial driver impl
 - half-duplex example
 - full-duplex example
+- `cmd_q` verification for driver impl
 
 ### Changed
 

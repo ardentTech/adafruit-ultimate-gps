@@ -7,8 +7,10 @@ use defmt::debug;
 use embedded_io_async::{ErrorType, Read, Write};
 use nmea::ParseResult;
 use nmea::sentences::{GgaData, GllData, RmcData};
+use pmtk::dt::ack::AckFlag;
 use pmtk::dt::nmea_output::Frequency;
-use pmtk::traits::CmdQ;
+use pmtk::response::PmtkResponse;
+use pmtk::traits::{CmdQ, Packet};
 
 // TODO locus logger
 
@@ -60,15 +62,51 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
         self.rx.read_sentence(&mut self.uart).await
     }
 
-    /// Sends a PMTK command.
-    pub async fn send(&mut self, command: impl CmdQ) -> Result<(), GpsError<UART::Error>> {
+    /// Sends a PMTK command with reception verification.
+    ///
+    /// * `cmd_q` - the PMTK command or query to write to the UART.
+    /// * `max_attempts` - the maximum number of responses to read while attempting to verify reception.
+    pub async fn send<T: CmdQ>(&mut self, cmd_q: T, max_attempts: u8) -> Result<bool, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("AdafruitUltimateGps.send()");
-        self.tx.send(&mut self.uart, command).await
+        self.tx.send(&mut self.uart, cmd_q).await?;
+        let mut i = 0;
+        let mut verified = false;
+
+        while i < max_attempts {
+            if let Some(gps_res) = self.rx.read_response(&mut self.uart).await? {
+                match gps_res {
+                    GpsResponse::Pmtk(pmtk_res) => match pmtk_res {
+                        PmtkResponse::Ack(dt) => {
+                            if dt.cmd == <T as Packet>::PKT_TYPE && dt.flag == AckFlag::ActionSucceeded {
+                                verified = true;
+                                break;
+                            }
+                        }
+                        _ => {}
+                    }
+                    _ => {}
+                }
+                i += 1;
+            }
+        }
+
+        Ok(verified)
+    }
+
+    /// Sends a PMTK command without reception verification.
+    ///
+    /// * `cmd_q` - the PMTK command or query to write to the UART.
+    pub async fn send_unverified(&mut self, cmd_q: impl CmdQ) -> Result<(), GpsError<UART::Error>> {
+        #[cfg(feature = "defmt")]
+        debug!("AdafruitUltimateGps.send_unverified()");
+        self.tx.send(&mut self.uart, cmd_q).await
     }
 
     /// Configures the chip for reading Gps data.
-    pub async fn start(&mut self, frequency_ms: u16) -> Result<(), GpsError<UART::Error>> {
+    ///
+    /// * `update_rate_ms` - the millisecond frequency for NMEA updates.
+    pub async fn start(&mut self, update_rate_ms: u16) -> Result<(), GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("AdafruitUltimateGps.start()");
         self.tx.send(&mut self.uart, pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
@@ -84,7 +122,7 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
 
         self.tx.send(
             &mut self.uart,
-            pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(frequency_ms)?
+            pmtk::cmd::set_nmea_update_rate::SetNmeaUpdateRateCmd::new(update_rate_ms)?
         ).await
     }
 }

@@ -25,6 +25,8 @@ impl Default for GpsReader {
 impl GpsReader {
 
     /// Parses a sentence into a NMEA or, if necessary, a PMTK response.
+    ///
+    /// * `sentence` - the raw sentence to parse.
     pub async fn parse<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.parse()");
@@ -58,6 +60,8 @@ impl GpsReader {
     }
 
     /// Reads a sentence and parses it into a response.
+    ///
+    /// * `uart` - the UART driver to read from.
     pub async fn read_response<UART: Read + ErrorType>(&mut self, uart: &mut UART) -> Result<Option<GpsResponse>, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.read_response()");
@@ -73,6 +77,8 @@ impl GpsReader {
     }
 
     /// Reads a raw sentence from the UART.
+    ///
+    /// * `uart` - the UART driver to read from.
     pub async fn read_sentence<UART: Read + ErrorType>(&mut self, uart: &mut UART) -> Result<Option<RawSentence>, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.read_sentence()");

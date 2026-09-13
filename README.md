@@ -35,8 +35,7 @@ driver, or refer to the built-in [half-duplex driver](https://github.com/ardentT
 ### TODO
 
 - [x] `defmt` feature
-- [ ] LOCUS integration
-- [ ] `driver.rs` verify flag for requests
+- [x] `driver.rs` verify flag for requests
 - [x] refactor `unwrap()`s
 - [x] `full_duplex` example
 - [ ] knock out TODOs
