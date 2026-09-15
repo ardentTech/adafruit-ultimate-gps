@@ -893,8 +893,9 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "nmea"
-version = "0.7.0"
-source = "git+https://github.com/AeroRust/nmea.git?rev=4550cd0#4550cd01a809cf0e7c9950fcc78787197ef9ab1c"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f194698caba0a523ca095ecb0d5b8a9a87f45be75f89d0a30bccb1ba1e142159"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -1080,8 +1081,9 @@ dependencies = [
 
 [[package]]
 name = "pmtk"
-version = "0.3.0"
-source = "git+https://github.com/ardentTech/pmtk.git?rev=da2e9ce#da2e9cee319bca38ebebc9965bf29717d925fc74"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f9038989aaffa32b52f2bb9ffc82efa6d747978d1bec81d74f81eae22b435e9"
 dependencies = [
  "defmt",
  "heapless",

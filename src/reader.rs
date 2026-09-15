@@ -2,7 +2,7 @@ use crate::types::GpsError;
 use crate::types::SENTENCE_MAX_LEN;
 use crate::types::{GpsResponse, RawSentence};
 #[cfg(feature = "defmt")]
-use defmt::{debug, error, info};
+use defmt::debug;
 use embedded_io_async::{ErrorType, Read};
 use heapless::Vec;
 use nmea::parse_str;
