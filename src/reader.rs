@@ -3,6 +3,9 @@ use crate::types::SENTENCE_MAX_LEN;
 use crate::types::{GpsResponse, RawSentence};
 #[cfg(feature = "defmt")]
 use defmt::debug;
+#[cfg(feature = "sync")]
+use embedded_io::{ErrorType, Read};
+#[cfg(not(feature = "sync"))]
 use embedded_io_async::{ErrorType, Read};
 use heapless::Vec;
 use nmea::parse_str;
@@ -27,6 +30,7 @@ impl GpsReader {
     /// Parses a sentence into a NMEA or, if necessary, a PMTK response.
     ///
     /// * `sentence` - the raw sentence to parse.
+    #[maybe_async::maybe_async]
     pub async fn parse<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.parse()");
@@ -47,12 +51,14 @@ impl GpsReader {
         }
     }
 
+    #[maybe_async::maybe_async]
     async fn parse_nmea<'a, UART: Read + ErrorType>(&mut self, sentence: &'a RawSentence) -> Result<GpsResponse, nmea::Error<'a>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.parse_nmea()");
         Ok(GpsResponse::Nmea(parse_str(sentence)?))
     }
 
+    #[maybe_async::maybe_async]
     async fn parse_pmtk<UART: Read + ErrorType>(&mut self, sentence: &RawSentence) -> Result<GpsResponse, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.parse_pmtk()");
@@ -62,6 +68,7 @@ impl GpsReader {
     /// Reads a sentence and parses it into a response.
     ///
     /// * `uart` - the UART driver to read from.
+    #[maybe_async::maybe_async]
     pub async fn read_response<UART: Read + ErrorType>(&mut self, uart: &mut UART) -> Result<Option<GpsResponse>, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.read_response()");
@@ -79,6 +86,7 @@ impl GpsReader {
     /// Reads a raw sentence from the UART.
     ///
     /// * `uart` - the UART driver to read from.
+    #[maybe_async::maybe_async]
     pub async fn read_sentence<UART: Read + ErrorType>(&mut self, uart: &mut UART) -> Result<Option<RawSentence>, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("GpsReader.read_sentence()");

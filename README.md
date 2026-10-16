@@ -26,6 +26,7 @@ driver, or refer to the built-in [half-duplex driver](https://github.com/ardentT
 ### Features
 
 - `defmt`: configure desired host log level with `$ export DEFMT_LOG=info`
+- `sync` sync driver implementation
 
 ### Examples
 
@@ -39,7 +40,7 @@ driver, or refer to the built-in [half-duplex driver](https://github.com/ardentT
 - [x] refactor `unwrap()`s
 - [x] `full_duplex` example
 - [ ] knock out TODOs
-- [ ] `sync` feature
+- [x] `sync` feature
 - [ ] sync examples
 
 
