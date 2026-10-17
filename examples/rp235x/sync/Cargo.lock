@@ -1095,6 +1095,7 @@ dependencies = [
  "defmt 1.2.0",
  "defmt-rtt",
  "embedded-hal 1.0.0",
+ "embedded-io",
  "panic-halt",
  "rp235x-hal",
 ]

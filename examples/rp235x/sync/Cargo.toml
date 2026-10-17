@@ -12,12 +12,20 @@ critical-section = {version = "1.2.0"}
 defmt = "1.1.0"
 defmt-rtt = "1.2.0"
 embedded-hal = "1.0.0"
+embedded-io = { version = "0.7.1", features = ["defmt"] }
 panic-halt = "1.0.0"
 rp235x-hal = { version = "0.4.0", features = ["binary-info", "critical-section-impl", "rt", "defmt"] }
 
 [profile.release]
 # Enable generation of debug symbols even on release builds
 debug = true
+
+[[bin]]
+name = "full_duplex"
+path = "src/bin/full_duplex.rs"
+test = false
+doctest = false
+bench = false
 
 [[bin]]
 name = "half_duplex"

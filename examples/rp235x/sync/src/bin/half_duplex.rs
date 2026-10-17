@@ -86,6 +86,7 @@ fn main() -> ! {
             Ok(response) => info!("gps.read ok: {:?}", response),
             Err(e) => error!("gps.read err: {:?}", e),
         }
+        // TODO need delay?
     }
 }
 
@@ -95,7 +96,7 @@ fn main() -> ! {
 pub static PICOTOOL_ENTRIES: [hal::binary_info::EntryAddr; 5] = [
     hal::binary_info::rp_cargo_bin_name!(),
     hal::binary_info::rp_cargo_version!(),
-    hal::binary_info::rp_program_description!(c"GPIO Input/Output Example"),
+    hal::binary_info::rp_program_description!(c"Adafruit Ultimate GPS Half-Duplex Sync Example"),
     hal::binary_info::rp_cargo_homepage_url!(),
     hal::binary_info::rp_program_build_attribute!(),
 ];
