@@ -1,0 +1,27 @@
+[package]
+name = "sync"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+adafruit-ultimate-gps = { path = "../../../", features = ["defmt", "sync"] }
+cortex-m = "0.7.7"
+cortex-m-rt = "0.7"
+critical-section = {version = "1.2.0"}
+defmt = "1.1.0"
+defmt-rtt = "1.2.0"
+embedded-hal = "1.0.0"
+panic-halt = "1.0.0"
+rp235x-hal = { version = "0.4.0", features = ["binary-info", "critical-section-impl", "rt", "defmt"] }
+
+[profile.release]
+# Enable generation of debug symbols even on release builds
+debug = true
+
+[[bin]]
+name = "half_duplex"
+path = "src/bin/half_duplex.rs"
+test = false
+doctest = false
+bench = false

@@ -13,7 +13,7 @@ use adafruit_ultimate_gps::pmtk::q::release::ReleaseQ;
 use adafruit_ultimate_gps::pmtk::traits::CmdQ;
 use adafruit_ultimate_gps::reader::GpsReader;
 use adafruit_ultimate_gps::types::GpsError;
-use adafruit_ultimate_gps::types::{GpsResponse, RawSentence};
+use adafruit_ultimate_gps::types::GpsResponse;
 use adafruit_ultimate_gps::writer::GpsWriter;
 use embassy_executor::Spawner;
 use embassy_rp::bind_interrupts;
