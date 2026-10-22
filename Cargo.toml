@@ -18,10 +18,10 @@ embedded-io = { version = "0.7.1", optional = true }
 embedded-io-async = { version = "0.7.0", features = ["defmt"] }
 heapless = { version = "0.9.3", features = ["defmt"] }
 maybe-async = "0.2"
-nmea = { version = "0.8.0", default-features = false, features = ["defmt", "GLL", "RMC", "VTG", "GGA", "GSA", "GSV", "ZDA"] }
-pmtk = { version = "0.4.0", features = ["defmt", "mt3339"] }
+nmea = { version = "0.8.0", default-features = false, features = ["GLL", "RMC", "VTG", "GGA", "GSA", "GSV", "ZDA"] }
+pmtk = { version = "0.4.0", features = ["mt3339"] }
 
 [features]
 default = []
-defmt = ["dep:defmt"]
+defmt = ["dep:defmt", "pmtk/defmt", "nmea/defmt"]
 sync = ["maybe-async/is_sync", "dep:embedded-io"]

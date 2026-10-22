@@ -20,7 +20,6 @@ use rp235x_hal::Clock;
 use rp235x_hal::fugit::RateExtU32;
 use rp235x_hal::multicore::{Multicore, Stack};
 use rp235x_hal::uart::{DataBits, StopBits, UartConfig};
-use adafruit_ultimate_gps::driver::AdafruitUltimateGps;
 use adafruit_ultimate_gps::pmtk;
 use adafruit_ultimate_gps::pmtk::dt::nmea_output::Frequency;
 use adafruit_ultimate_gps::pmtk::q::release::ReleaseQ;
@@ -172,8 +171,9 @@ fn main() -> ! {
     loop {
         // read parsed sentences
         match gps_rx.read() {
-            Ok(response) => info!("gps.read ok: {:?}", response),
-            Err(e) => error!("gps.read err: {:?}", e),
+            Ok(Some(res)) => info!("{:?}", res),
+            Ok(None) => {}
+            Err(e) => error!("{:?}", e),
         }
     }
 }

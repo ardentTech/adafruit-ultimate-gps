@@ -1,7 +1,6 @@
 use chrono::{NaiveDate, NaiveTime};
 use core::str::Utf8Error;
-#[cfg(feature = "defmt")]
-use defmt::Format;
+
 use heapless::String;
 use nmea::ParseResult;
 use nmea::sentences::rmc::{RmcNavigationStatus, RmcStatusOfFix};
@@ -20,7 +19,7 @@ pub enum GpsResponse {
 }
 
 #[cfg(feature = "defmt")]
-impl Format for GpsResponse {
+impl defmt::Format for GpsResponse {
     fn format(&self, fmt: defmt::Formatter) {
         match self {
             GpsResponse::Nmea(sentence) => match sentence {

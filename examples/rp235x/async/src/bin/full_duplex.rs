@@ -96,6 +96,7 @@ async fn gps_rx_task(mut gps_rx: GpsRx<BufferedUartRx>) {
 async fn gps_tx_task(mut gps_tx: GpsTx<BufferedUartTx>) {
     info!("gps_tx_task");
 
+    Timer::after_millis(1_000).await;
     gps_tx.send(
         pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
             Frequency::Disabled,

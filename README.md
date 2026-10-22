@@ -41,7 +41,7 @@ driver, or refer to the built-in [half-duplex driver](https://github.com/ardentT
 - [x] `full_duplex` example
 - [ ] knock out TODOs
 - [x] `sync` feature
-- [ ] sync examples
+- [x] sync examples
 
 
 ### License
