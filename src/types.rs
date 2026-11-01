@@ -8,6 +8,7 @@ use nmea::sentences::{FaaMode, FixType, GgaData, GllData, RmcData};
 use pmtk::error::PmtkError;
 use pmtk::response::PmtkResponse;
 
+/// Max byte length of NMEA and PMTK sentences.
 pub const SENTENCE_MAX_LEN: usize = 255;
 
 pub type RawSentence = String<SENTENCE_MAX_LEN>;
@@ -21,6 +22,7 @@ pub enum GpsResponse {
 #[cfg(feature = "defmt")]
 impl defmt::Format for GpsResponse {
     fn format(&self, fmt: defmt::Formatter) {
+        // TODO there has to be a better way to do this...
         match self {
             GpsResponse::Nmea(sentence) => match sentence {
                 ParseResult::GGA(data) => defmt::write!(fmt, "NMEA {}", data),
@@ -129,6 +131,7 @@ impl GpsReading {
     }
 }
 
+/// Adafruit Ultimate GPS error.
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Debug)]
 pub enum GpsError<UART> {

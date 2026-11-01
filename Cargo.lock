@@ -184,9 +184,9 @@ dependencies = [
 
 [[package]]
 name = "pmtk"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f9038989aaffa32b52f2bb9ffc82efa6d747978d1bec81d74f81eae22b435e9"
+checksum = "33aeea0704be3437652d2c928f04609ee7d51afd98544cc91609c3565c80c8b9"
 dependencies = [
  "defmt",
  "heapless",

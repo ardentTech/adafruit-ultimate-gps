@@ -7,6 +7,7 @@ use embedded_io::{ErrorType, Write};
 use embedded_io_async::{ErrorType, Write};
 use pmtk::traits::CmdQ;
 
+/// Writes PMTK commands and/or queries.
 pub struct GpsWriter {}
 
 impl GpsWriter {

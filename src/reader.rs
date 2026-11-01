@@ -13,7 +13,7 @@ use pmtk::response::PmtkResponse;
 
 const LINE_FEED: u8 = 0x0a; // '\n'
 
-/// Reads and parses GPS sentences.
+/// Reads and parses GPS sentences via a 255-byte buffer.
 pub struct GpsReader {
     buffer: [u8; SENTENCE_MAX_LEN],
     buffer_idx: usize,

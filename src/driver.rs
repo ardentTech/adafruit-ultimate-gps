@@ -15,15 +15,13 @@ use pmtk::dt::nmea_output::Frequency;
 use pmtk::response::PmtkResponse;
 use pmtk::traits::{CmdQ, Packet};
 
-// TODO locus logger
-
+/// Adafruit Ultimate GPS driver.
 pub struct AdafruitUltimateGps<UART> {
     rx: GpsReader,
     tx: GpsWriter,
     uart: UART,
 }
 
-// GGA (GLL backup) + RMC
 impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
 
     /// Constructs a new driver instance.
@@ -33,7 +31,7 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
         Self { rx: GpsReader::default(), tx: GpsWriter {}, uart }
     }
 
-    /// Reads Gps data.
+    /// Reads Gps data from NMEA GGA, GLL and RMC sentence types.
     #[maybe_async::maybe_async]
     pub async fn read(&mut self) -> Result<GpsReading, GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
@@ -67,7 +65,7 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
         self.rx.read_sentence(&mut self.uart).await
     }
 
-    /// Sends a PMTK command with reception verification.
+    /// Sends a PMTK command and verifies reception.
     ///
     /// * `cmd_q` - the PMTK command or query to write to the UART.
     /// * `max_attempts` - the maximum number of responses to read while attempting to verify reception.
@@ -100,7 +98,7 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
         Ok(verified)
     }
 
-    /// Sends a PMTK command without reception verification.
+    /// Sends a PMTK command without verifying reception.
     ///
     /// * `cmd_q` - the PMTK command or query to write to the UART.
     #[maybe_async::maybe_async]
@@ -117,16 +115,15 @@ impl<UART: Read + Write + ErrorType> AdafruitUltimateGps<UART> {
     pub async fn start(&mut self, update_rate_ms: u16) -> Result<(), GpsError<UART::Error>> {
         #[cfg(feature = "defmt")]
         debug!("AdafruitUltimateGps.start()");
-        self.tx.send(&mut self.uart, pmtk::cmd::set_nmea_output::SetNmeaOutputCmd::new(
-            // TODO change pmtk lib bc unnamed params here suck
-            Frequency::OnceEveryOnePositionFix,
-            Frequency::OnceEveryOnePositionFix,
-            Frequency::Disabled,
-            Frequency::OnceEveryOnePositionFix,
-            Frequency::Disabled,
-            Frequency::Disabled,
-            Frequency::Disabled,
-        )).await?;
+        self.tx.send(&mut self.uart, pmtk::cmd::set_nmea_output::SetNmeaOutputCmd {
+            gll: Frequency::OnceEveryOnePositionFix,
+            rmc: Frequency::OnceEveryOnePositionFix,
+            vtg: Frequency::Disabled,
+            gga: Frequency::OnceEveryOnePositionFix,
+            gsa: Frequency::Disabled,
+            gsv: Frequency::Disabled,
+            mchn: Frequency::Disabled,
+        }).await?;
 
         self.tx.send(
             &mut self.uart,
